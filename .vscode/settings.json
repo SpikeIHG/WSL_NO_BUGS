@@ -1,0 +1,18 @@
+{
+    "cmake.configureOnOpen": false,
+    
+    "files.associations": {
+        "iostream": "cpp",
+        "new": "cpp",
+        "memory": "cpp",
+        "type_traits": "cpp",
+        "iosfwd": "cpp",
+        "*.tcc": "cpp",
+        "cstddef": "cpp",
+        "string": "cpp",
+        "string_view": "cpp",
+        "iomanip": "cpp",
+        "ostream": "cpp",
+        "system_error": "cpp"
+    }
+}
