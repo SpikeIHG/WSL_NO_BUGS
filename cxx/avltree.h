@@ -14,7 +14,7 @@
 
 #include<stdio.h>
 #include<stdlib.h>
-
+#include<iostream>
 #define _AVLTREE_NAMESPACE_START namespace avl_tree {
 #define _AVLTREE_NAMESPACE_END  }
 
@@ -34,10 +34,6 @@ Position FindMax(AvlTree);
 AvlTree Insert(ElemType,AvlTree);
 AvlTree Delete(ElemType,AvlTree);
 ElemType Retrieve(Position P);
-
-
-
-
 
 
 _AVLTREE_NAMESPACE_END

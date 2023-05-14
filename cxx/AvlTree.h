@@ -191,4 +191,7 @@ AvlTree Insert(ElemType X,AvlTree T)
 }  
 _AVLTREE_NAMESPACE_END
 
+
+
+
 #endif // !AVL_TREE__
