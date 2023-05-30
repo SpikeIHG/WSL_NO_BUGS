@@ -46,6 +46,8 @@ namespace {         // Static 函数
         {
             Doprint(T->Left);
             printf("%d ",T->Element);
+            if(T->Left==NullNode&&T->Right==NullNode)
+                printf("leaf %d ",T->Color);
             Doprint(T->Right);
         }
    }

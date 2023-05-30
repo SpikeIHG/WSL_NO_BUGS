@@ -48,7 +48,7 @@ int main(void)
     // InOrderTraverse(T_splay);
 
     RedBlackTree T=rb_tree_::Initialize();
-    for(int i=1;i!=10;++i)
+    for(int i=1;i!=50;++i)
         T=rb_tree_::Insert(i*i,T);
 
     rb_tree_::InorderTraverse(T);
