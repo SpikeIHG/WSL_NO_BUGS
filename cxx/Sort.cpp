@@ -12,6 +12,7 @@
 #include<stdio.h>
 #include<string>
 #include<random>
+#include<stdlib.h>
 #define MAXSIZE 20
 using KeyType=int;
 using ElemType=int;
@@ -188,6 +189,169 @@ void quicksort_(ElemType arr[],int length)
 {
     mysort(arr,0,length-1);
 }
+// 快速排序的潜在优化  按照大话数据结构的思路来
+/**
+ * @brief 划分函数 第一版 演示思路 先以第一个为枢纽元 然后左右依次交换
+ * @param L 
+ * @param low 
+ * @param high 
+ */
+inline void swap_(Sqlist &L,int a,int b)
+{
+    auto tmp=L.rec[a];
+    L.rec[a]=L.rec[b];
+    L.rec[b]=tmp;
+}
+
+int Partition_1(Sqlist&L,int low,int high)
+{
+    int pivotkey=L.rec[low].key;
+
+    while(low<high)
+    {
+        while(low<high&&pivotkey<=L.rec[high].key)--high;
+        swap_(L,high,low);
+        while(low<high&&pivotkey>=L.rec[low].key)++low;
+        swap_(L,low,high);
+    }
+    return low;     // 最终退出时 high==low 一定成立的
+}
+
+void Qsort(Sqlist&L,int low,int high)
+{
+    int pivot;
+    if(low<high)
+    {
+        pivot=Partition_1(L,low,high);
+        Qsort(L,low,pivot-1);       // 注意一个是减一，一个是加一
+        Qsort(L,pivot+1,high);
+    }
+}
+/**
+ * @brief 顺序表是以第一个元素开始存储的
+ * @param L 
+ */
+void QuickSort(Sqlist&L)
+{
+    Qsort(L,1,L.length);    // 这里是以第一个元素开始存储的
+}
+// 优化枢纽的选择 因为固定位置的选择 可能很大程度 取决于 随机的运气 所以采用三数比较法
+//如果对应很大的排序队伍可以采用 9数取中
+#define MAX_PIVOT_LIMIT     101     // 九数取中的阈值
+/**
+ * @brief 三数取中与九数取中的优化 划分
+ * @param L 
+ * @param low 
+ * @param high 
+ * @return int 
+ */
+int Partition_2(Sqlist&L,int low,int high)
+{
+    int pivotkey;
+    if(high-low<MAX_PIVOT_LIMIT)
+    {
+        // 可以有的判断组合很多 我们采用三个if判断
+        int m=(high+low)/2;
+        if(L.rec[low].key>L.rec[high].key)
+            swap_(L,high,low);
+        if(L.rec[m].key>L.rec[high].key)
+            swap_(L,m,high);
+        if(L.rec[m].key>L.rec[low].key)
+            swap_(L,m,low);
+    }
+    else        //九数 感觉比较太多了 没有必要 可以写个简答的插入排序来找到这五个值的中值
+    {
+        int tmp[5];
+        int mm=(low+high)/2;
+        tmp[0]=L.rec[(low+high)/2].key;
+        tmp[1]=L.rec[(low+mm)/2].key;
+        tmp[2]=L.rec[(mm+high)/2].key;
+        tmp[3]=L.rec[low].key;
+        tmp[4]=L.rec[high].key;
+        InsertSort(tmp,5);
+        swap_(L,low,tmp[2]);
+    }
+    pivotkey=L.rec[low].key;        // 保持与之前的统一
+
+    while(low<high)
+    {
+        while(low<high&&pivotkey<=L.rec[high].key)--high;
+            swap_(L,high,low);  // 其实就是最终的 不需要交换 而是直接赋值即可
+        while(low<high&&pivotkey>=L.rec[low].key)++low;
+            swap_(L,low,high);
+    }
+
+    return low;
+}
+//优化不必要的交换 
+int Partition_3(Sqlist&L,int low,int high)
+{
+    int pivotkey;
+    if(high-low<MAX_PIVOT_LIMIT)
+    {
+        // 可以有的判断组合很多 我们采用三个if判断
+        int m=(high+low)/2;
+        if(L.rec[low].key>L.rec[high].key)
+            swap_(L,high,low);
+        if(L.rec[m].key>L.rec[high].key)
+            swap_(L,m,high);
+        if(L.rec[m].key>L.rec[low].key)
+            swap_(L,m,low);
+    }
+    else        //九数 感觉比较太多了 没有必要 可以写个简答的插入排序来找到这五个值的中值
+    {
+        int tmp[5];
+        int mm=(low+high)/2;
+        tmp[0]=L.rec[(low+high)/2].key;
+        tmp[1]=L.rec[(low+mm)/2].key;
+        tmp[2]=L.rec[(mm+high)/2].key;
+        tmp[3]=L.rec[low].key;
+        tmp[4]=L.rec[high].key;
+        InsertSort(tmp,5);
+        swap_(L,low,tmp[2]);
+    }
+    pivotkey=L.rec[low].key;        // 保持与之前的统一
+    L.rec[0]=L.rec[low];
+    while(low<high)
+    {
+        while(low<high&&pivotkey<=L.rec[high].key)--high;
+            L.rec[low]=L.rec[high];
+        while(low<high&&pivotkey>=L.rec[low].key)++low;
+            L.rec[high]=L.rec[low];
+    }
+    L.rec[low]=L.rec[0];
+    return low;
+}
+// 优化小数组排序 选择插入排序
+void Qsort2(Sqlist&L,int low,int high)
+{
+    int pivot;
+    if(high-low>MAX_PIVOT_LIMIT)
+    {
+        pivot=Partition_3(L,low,high);
+        Qsort2(L,low,pivot-1);
+        Qsort(L,pivot+1,high);
+    }
+    else
+    //InsertSort()      // 自己去完善一下吧
+    ;
+}
+// !最后一个尾递归有点惊艳
+void Qsort3(Sqlist&L,int low,int high)
+{
+    int pivot;
+    while(low<high)
+    {
+        pivot=Partition_3(L,low,high);
+        Qsort3(L,low,pivot-1);
+        low=pivot+1;        // 相当于 Qsort(pivot+1,high)   low 此时可以赋新值
+    }
+}
+void QuickSort_pro(Sqlist&L)
+{
+    Qsort3(L,1,L.length);
+}
+
 /**
  * @brief 选择排序 交换次数很少 
  * 树形选择排序 log
@@ -244,9 +408,85 @@ void heapsort(ElemType arr[],int length)
     }
 }
 
+#define MAXSIZE    101
+/**
+ * @brief 归并程序 核心程序 就是讲一个的两个部分归并到一个中
+ * @param SR 源
+ * @param TR 得到的有序的
+ * @param i 起始的序号
+ * @param m SR 的中间
+ * @param n TR 的结束
+ */
+void Merge(ElemType SR[],ElemType TR[],int i,int m,int n)
+{
+    int j,k,l;  // k 是 TR的下标
+    for(j=m+1,k=i;k<=m&&j<=n;++k)
+    {
+        if(SR[i]<SR[j])
+        TR[k]=SR[i++];
+        else
+        TR[k]=SR[j++];
+    }
+    while(i<=m)TR[k++]=SR[i++];
+    while(j<=n)TR[k++]=SR[j++];
+}
+void Msort(ElemType SR[],ElemType TR[],int s,int t)
+{
+    int m;
+    ElemType TR2[MAXSIZE+1];
+    if(s==t)
+        TR[s]=SR[s];        // 这里有点容易出错
+    else
+    {
+        m=(s+t)/2;
+        Msort(SR,TR2,s,m);
+        Msort(SR,TR2,m+1,t);
+        Merge(TR2,TR,s,m,t);
+    }
+}
+// 非递归实现 归并排序
+void MergePass(int SR[],int TR[],int s,int n)
+{
+    int i=1;
+    int j;
+
+    while(i<=n-2*s+1)
+    {
+        Merge(SR,TR,i,i+s-1,i+2*s-1);
+        i+=2*s;
+    }
+    if(i<n-s+1)
+        Merge(SR,TR,i,i+s-1,n);
+    else
+        for(j=i;j<=n;++j)
+        TR[j]=SR[j];
+}
+/**
+ * @brief 非递归实现 归并排序 的主程序
+ * 
+ * @param arr 
+ * @param length 
+ */
+
+void MSort2(ElemType arr[],int length)
+{
+    int*TR=(ElemType*)malloc(sizeof(ElemType)*(MAXSIZE+1));
+    int k=1;        // 相当于是步长
+    while(k<length)
+    {
+        MergePass(arr,TR,k,length);
+        k*=2;
+        MergePass(TR,arr,k,length);
+        k*=2;
+    }
+}
+
+
+
+
 int main(void)
 {
-    
+    // 测试的样例 不过我的数据结构似乎没有统一  见谅！
     //std::cin.tie(nullptr);
     std::default_random_engine e(4335346);
     std::uniform_int_distribution<unsigned int> sample(0,40);
